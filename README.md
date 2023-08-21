@@ -1,3 +1,5 @@
+![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sk0n0va_restcountries.client&metric=alert_status)
+
 # .NET 6 Web API Project
 
 TBD
