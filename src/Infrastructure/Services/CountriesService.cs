@@ -23,18 +23,11 @@ namespace Infrastructure.Services
 
             try
             {
-                return JsonSerializer.Deserialize<List<Country>>(response) ??
-                    throw new InvalidOperationException("Failed to deserialize countries. Result is null.");
+                return JsonSerializer.Deserialize<List<Country>>(response);
             }
             catch (JsonException ex)
             {
-                int errorPos = (int)(ex.BytePositionInLine ?? 0);
-                int start = Math.Max(0, errorPos - 40);
-                int length = Math.Min(response.Length - start, 60);
-
-                string fragment = response.Substring(start, length);
-
-                throw new JsonException($"Deserialization failed near: ...{fragment}...", ex);
+                throw new JsonException($"An error occurred while deserializing the response. Input: {response?[..Math.Min(response.Length, 200)]}", ex);
             }
         }
     }
