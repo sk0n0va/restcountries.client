@@ -17,15 +17,15 @@ namespace Infrastructure.Services
             _apiUrl = options.Value.ApiUrl;
         }
 
-        public async Task<IReadOnlyCollection<Country>> FetchCountriesAsync(Filter? filter = null)
+        public async Task<IReadOnlyCollection<Country>> FetchCountriesAsync(Filter? filter = null, string sort = "acsend")
         {
             var client = _httpClientFactory.CreateClient();
             var response = await client.GetStringAsync(_apiUrl);
 
-            List<Country> countries;
+            IEnumerable<Country> countries;
             try
             {
-                countries = JsonSerializer.Deserialize<List<Country>>(response);
+                countries = JsonSerializer.Deserialize<List<Country>>(response).ToList();
             }
             catch (JsonException ex)
             {
@@ -37,7 +37,25 @@ namespace Infrastructure.Services
                 return filter.Strategy.Filter(countries, filter.Query).ToList();
             }
 
-            return countries ?? new List<Country>();
+            if(countries is not null)
+            {
+                countries = filter?.Strategy.Filter(countries, filter.Query) ?? countries;
+                countries = Sort(countries, sort);
+            }
+
+            return countries?.ToList() ?? new List<Country>();
+        }
+
+        private IEnumerable<Country> Sort(IEnumerable<Country> countries, string sort, Func<Country, object>? keySelector = null)
+        {
+            keySelector ??= c => c.Name.Common;
+
+            if (sort == "acsend")
+                return countries.OrderBy(o => o.Name).AsEnumerable();
+            else if (sort == "descend")
+                return countries.OrderByDescending(keySelector);
+
+            return countries;
         }
     }
 }
