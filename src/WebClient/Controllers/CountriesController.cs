@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Models;
 using Infrastructure.Services;
+using Infrastructure.Services.Filtering;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebClient.Controllers
@@ -16,9 +17,10 @@ namespace WebClient.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyCollection<Country>>> Get([FromQuery] string? param1, [FromQuery] int? param2, [FromQuery] string? param3, [FromQuery] string? param4)
+        public async Task<ActionResult<IReadOnlyCollection<Country>>> Get([FromQuery] FilterType filterType = 0, [FromQuery] string? query = null)
         {
-            var countries = await _countriesService.FetchCountriesAsync();
+            var filter = FilterFactory.Create(filterType, query);
+            var countries = await _countriesService.FetchCountriesAsync(filter);
 
             return Ok(countries);
         }

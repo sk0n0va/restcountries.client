@@ -1,7 +1,9 @@
 using Infrastructure.Options;
 using Infrastructure.Services;
+using Infrastructure.Services.Filtering;
 using Microsoft.Extensions.Options;
 using Moq;
+using Moq.Protected;
 using System.Net;
 using System.Text.Json;
 
@@ -70,5 +72,29 @@ public class CountriesServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<JsonException>(() => CreateServiceWithHandler(clientHandlerStub).FetchCountriesAsync());
+    }
+
+    [Fact]
+    public async Task FetchCountriesAsync_AppliesFilter_WhenFilterIsProvided()
+    {
+        // Arrange
+        var clientHandlerStub = new DelegatingHandlerStub((request, cancellationToken) =>
+        {
+            var content = File.ReadAllText("../../../TestData/full-response-valid.json");
+            return new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(content)
+            };
+        });
+        var service = CreateServiceWithHandler(clientHandlerStub);
+        var filter = new Filter(new FilterByCountryName(), "ukR");
+
+        // Act
+        var result = await service.FetchCountriesAsync(filter);
+
+        // Assert
+        Assert.Single(result);
+        Assert.Equal("Ukraine", result.First().Name.Common);
     }
 }

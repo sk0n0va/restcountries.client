@@ -1,5 +1,6 @@
 using Infrastructure.Models;
 using Infrastructure.Services;
+using Infrastructure.Services.Filtering;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using WebClient.Controllers;
@@ -23,10 +24,10 @@ public class CountriesControllerTests
     {
         // Arrange
         var mockCountries = CountriesLists.GetValidListWithOneItem();
-        _countriesServiceMock.Setup(s => s.FetchCountriesAsync()).ReturnsAsync(mockCountries);
+        _countriesServiceMock.Setup(s => s.FetchCountriesAsync(null)).ReturnsAsync(mockCountries);
 
         // Act
-        var result = await _controller.Get(null, null, null, null);
+        var result = await _controller.Get();
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -38,9 +39,29 @@ public class CountriesControllerTests
     public async Task Get_ThrowsException_WhenServiceFails()
     {
         // Arrange
-        _countriesServiceMock.Setup(s => s.FetchCountriesAsync()).ThrowsAsync(new Exception());
+        _countriesServiceMock.Setup(s => s.FetchCountriesAsync(null)).ThrowsAsync(new Exception());
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => _controller.Get(null, null, null, null));
+        await Assert.ThrowsAsync<Exception>(() => _controller.Get());
+    }
+
+    [Fact]
+    public async Task Get_WithValidFilterTypeAndQuery_ReturnsExpectedCountries()
+    {
+        // Arrange
+        var filterTypeMock = FilterType.CountryCommonName;
+        var queryMock = "ain";
+        var mockCountries = CountriesLists.GetValidListWithOneItem();
+        _countriesServiceMock
+            .Setup(s => s.FetchCountriesAsync(It.IsAny<Filter?>()))
+            .ReturnsAsync(mockCountries);
+
+        // Act
+        var actionResult = await _controller.Get(filterTypeMock, queryMock);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+        var countries = Assert.IsAssignableFrom<List<Country>>(okResult.Value);
+        Assert.Contains(countries, country => country.Name.Common.Contains("Ukraine"));
     }
 }
