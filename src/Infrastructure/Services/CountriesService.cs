@@ -17,7 +17,7 @@ namespace Infrastructure.Services
             _apiUrl = options.Value.ApiUrl;
         }
 
-        public async Task<IReadOnlyCollection<Country>> FetchCountriesAsync(Filter? filter = null, string sort = "acsend")
+        public async Task<IReadOnlyCollection<Country>> FetchCountriesAsync(Filter? filter = null, string sort = "acsend", int limit = 15)
         {
             var client = _httpClientFactory.CreateClient();
             var response = await client.GetStringAsync(_apiUrl);
@@ -41,6 +41,7 @@ namespace Infrastructure.Services
             {
                 countries = filter?.Strategy.Filter(countries, filter.Query) ?? countries;
                 countries = Sort(countries, sort);
+                countries = countries.Take(limit);
             }
 
             return countries?.ToList() ?? new List<Country>();

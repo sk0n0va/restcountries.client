@@ -5,6 +5,6 @@ namespace Infrastructure.Services
 {
     public interface ICountriesService
     {
-        Task<IReadOnlyCollection<Country>> FetchCountriesAsync(Filter? filter = null, string sort = "acsend");
+        Task<IReadOnlyCollection<Country>> FetchCountriesAsync(Filter? filter = null, string sort = "acsend", int limit = 15);
     }
 }
