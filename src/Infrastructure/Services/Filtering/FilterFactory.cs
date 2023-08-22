@@ -9,6 +9,7 @@ public class FilterFactory
         return filterType switch
         {
             FilterType.CountryCommonName => new Filter(new FilterByCountryName(), query),
+            FilterType.CountryPopulation => new Filter(new FilterByCountryPopulation(), query),
             _ => null
         };
     }

@@ -4,4 +4,5 @@ public enum FilterType
 {
     None,
     CountryCommonName,
+    CountryPopulation,
 }
