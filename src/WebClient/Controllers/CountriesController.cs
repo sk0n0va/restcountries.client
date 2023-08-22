@@ -17,10 +17,10 @@ namespace WebClient.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyCollection<Country>>> Get([FromQuery] FilterType filterType = 0, [FromQuery] string? query = null)
+        public async Task<ActionResult<IReadOnlyCollection<Country>>> Get([FromQuery] FilterType filterType = 0, [FromQuery] string? query = null, string? sort = null, int limit = 15)
         {
             var filter = FilterFactory.Create(filterType, query);
-            var countries = await _countriesService.FetchCountriesAsync(filter);
+            var countries = await _countriesService.FetchCountriesAsync(filter, sort, limit);
 
             return Ok(countries);
         }
