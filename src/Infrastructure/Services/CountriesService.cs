@@ -17,7 +17,7 @@ namespace Infrastructure.Services
             _apiUrl = options.Value.ApiUrl;
         }
 
-        public async Task<IReadOnlyCollection<Country>> FetchCountriesAsync(Filter? filter = null, string sort = "acsend", int limit = 0)
+        public async Task<IReadOnlyCollection<Country>> FetchCountriesAsync(Filter? filter = null, string? sort = null, int limit = 0)
         {
             var client = _httpClientFactory.CreateClient();
             var response = await client.GetStringAsync(_apiUrl);
@@ -42,12 +42,12 @@ namespace Infrastructure.Services
             return countries?.ToList() ?? new List<Country>();
         }
 
-        private IEnumerable<Country> Sort(IEnumerable<Country> countries, string sort, Func<Country, object>? keySelector = null)
+        private IEnumerable<Country> Sort(IEnumerable<Country> countries, string? sort, Func<Country, object>? keySelector = null)
         {
             keySelector ??= c => c.Name.Common;
 
             if (sort == "acsend")
-                return countries.OrderBy(o => o.Name).AsEnumerable();
+                return countries.OrderBy(keySelector).AsEnumerable();
             else if (sort == "descend")
                 return countries.OrderByDescending(keySelector);
 

@@ -3,6 +3,7 @@ using Infrastructure.Services;
 using Infrastructure.Services.Filtering;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Collections.Generic;
 using WebClient.Controllers;
 using WebClient.Tests.TestData;
 
@@ -23,11 +24,12 @@ public class CountriesControllerTests
     public async Task Get_ReturnsCountries_WhenServiceSucceeds()
     {
         // Arrange
+        var limit = 0;
         var mockCountries = CountriesLists.GetValidListWithOneItem();
-        _countriesServiceMock.Setup(s => s.FetchCountriesAsync(null)).ReturnsAsync(mockCountries);
+        _countriesServiceMock.Setup(s => s.FetchCountriesAsync(It.IsAny<Filter>(), null, limit)).ReturnsAsync(mockCountries);
 
         // Act
-        var result = await _controller.Get();
+        var result = await _controller.Get(limit: limit);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -39,10 +41,11 @@ public class CountriesControllerTests
     public async Task Get_ThrowsException_WhenServiceFails()
     {
         // Arrange
-        _countriesServiceMock.Setup(s => s.FetchCountriesAsync(null)).ThrowsAsync(new Exception());
+        var limit = 0;
+        _countriesServiceMock.Setup(s => s.FetchCountriesAsync(It.IsAny<Filter>(), null, limit)).ThrowsAsync(new Exception());
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => _controller.Get());
+        await Assert.ThrowsAsync<Exception>(() => _controller.Get(limit: limit));
     }
 
     [Fact]
@@ -52,12 +55,13 @@ public class CountriesControllerTests
         var filterTypeMock = FilterType.CountryCommonName;
         var queryMock = "ain";
         var mockCountries = CountriesLists.GetValidListWithOneItem();
+        var limit = 0;
         _countriesServiceMock
-            .Setup(s => s.FetchCountriesAsync(It.IsAny<Filter?>()))
+            .Setup(s => s.FetchCountriesAsync(It.IsAny<Filter>(), null, limit))
             .ReturnsAsync(mockCountries);
 
         // Act
-        var actionResult = await _controller.Get(filterTypeMock, queryMock);
+        var actionResult = await _controller.Get(filterTypeMock, queryMock, limit: limit);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
