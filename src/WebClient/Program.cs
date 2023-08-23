@@ -2,6 +2,8 @@ using Infrastructure.Options;
 using System.Diagnostics.CodeAnalysis;
 using WebClient.Infrastructure;
 
+namespace WebClient;
+
 [ExcludeFromCodeCoverage]
 internal class Program
 {
